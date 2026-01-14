@@ -76,45 +76,42 @@ export function FilesPage({ files, onDeleteFile }: FilesPageProps) {
   // 如果在预览模式，显示预览页面
   if (previewFile) {
     return (
-      <div className="fixed inset-0 bg-slate-50 z-50 flex flex-col">
-        {/* Header */}
-        <div className="bg-white border-b border-slate-200 px-4 py-4">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setPreviewFile(null)}
-              className="p-2 -ml-2 hover:bg-slate-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-slate-600" />
-            </button>
-            <h1 className="text-lg text-slate-800">文件预览</h1>
-          </div>
-        </div>
+      <div className="fixed inset-0 bg-slate-50 z-50 flex items-center justify-center">
+        <div className="relative w-[380px] h-[780px] bg-black rounded-[44px] shadow-2xl p-3">
+          {/* Notch */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-b-3xl" />
+          {/* Screen */}
+          <div className="relative w-full h-full bg-white rounded-[36px] overflow-hidden">
+            {/* Mini-program UI inside phone */}
+            <div className="absolute inset-0 pt-6 flex flex-col">
+              {/* Header inside phone */}
+              <div className="bg-white border-b border-slate-200 px-3 py-3 flex items-center gap-3">
+                <button
+                  onClick={() => setPreviewFile(null)}
+                  className="p-2 -ml-2 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5 text-slate-600" />
+                </button>
+                <h1 className="text-sm text-slate-800">文件预览</h1>
+              </div>
 
-        {/* Preview Content - Phone Mockup */}
-        <div className="flex-1 px-4 py-4 pb-24 flex items-center justify-center">
-          <div className="relative w-[380px] h-[780px] bg-black rounded-[44px] shadow-2xl p-3">
-            {/* Notch */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-b-3xl" />
-            {/* Screen */}
-            <div className="relative w-full h-full bg-white rounded-[36px] overflow-hidden">
-              <div className="absolute inset-0 pt-6 overflow-y-auto">
-                <div className="space-y-3 p-3">
-                  <img src={src1} alt="第 1 页" className="w-full rounded-lg border border-slate-200" />
-                  <img src={src2} alt="第 2 页" className="w-full rounded-lg border border-slate-200" />
-                  <img src={src3} alt="第 3 页" className="w-full rounded-lg border border-slate-200" />
-                  <img src={src3} alt="第 4 页" className="w-full rounded-lg border border-slate-200" />
-                </div>
+              {/* Scrollable content inside phone */}
+              <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 pb-24">
+                <img src={src1} alt="第 1 页" className="w-full rounded-lg border border-slate-200" />
+                <img src={src2} alt="第 2 页" className="w-full rounded-lg border border-slate-200" />
+                <img src={src3} alt="第 3 页" className="w-full rounded-lg border border-slate-200" />
+                <img src={src3} alt="第 4 页" className="w-full rounded-lg border border-slate-200" />
+              </div>
+
+              {/* Download Button inside phone */}
+              <div className="absolute bottom-0 left-0 right-0 px-3 pb-4 pt-2 bg-white border-t border-slate-200">
+                <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+                  <Download className="w-5 h-5" />
+                  下载文件
+                </button>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Download Button - Fixed at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 bg-slate-50">
-          <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
-            <Download className="w-5 h-5" />
-            下载文件
-          </button>
         </div>
       </div>
     );
