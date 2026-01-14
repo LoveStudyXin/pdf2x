@@ -10,9 +10,9 @@ import {
 
 // 确保图片链接有效 
 import imgImage1 from '../../assets/images/preview1.png';
- import imgImage2 from '../../assets/images/preview2.png';
- import imgImage3 from '../../assets/images/preview3.png';
- const src1 = typeof imgImage1 === 'string' ? imgImage1 : imgImage1.src;
+import imgImage2 from '../../assets/images/preview2.png';
+import imgImage3 from '../../assets/images/preview3.png';
+const src1 = typeof imgImage1 === 'string' ? imgImage1 : imgImage1.src;
 const src2 = typeof imgImage2 === 'string' ? imgImage2 : imgImage2.src;
 const src3 = typeof imgImage3 === 'string' ? imgImage3 : imgImage3.src;
 
@@ -90,22 +90,20 @@ export function FilesPage({ files, onDeleteFile }: FilesPageProps) {
           </div>
         </div>
 
-        {/* Preview Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
-          <div className="bg-white rounded-xl p-4">
-            <div className="space-y-3">
-              {/* 使用占位图片 */}
-              <div className="relative w-full aspect-[308/174] rounded-lg overflow-hidden">
-                <img src = {src1} alt="第 1 页" className="w-full h-full object-cover" />
-              </div>
-              <div className="relative w-full aspect-[308/173] rounded-lg overflow-hidden">
-                <img src={src2} alt="第 2 页" className="w-full h-full object-cover" />
-              </div>
-              <div className="relative w-full aspect-[309/173] rounded-lg overflow-hidden">
-                <img src={src3} alt="第 3 页" className="w-full h-full object-cover" />
-              </div>
-              <div className="relative w-full aspect-[309/173] rounded-lg overflow-hidden">
-                <img src={src3} alt="第 4 页" className="w-full h-full object-cover" />
+        {/* Preview Content - Phone Mockup */}
+        <div className="flex-1 px-4 py-4 pb-24 flex items-center justify-center">
+          <div className="relative w-[380px] h-[780px] bg-black rounded-[44px] shadow-2xl p-3">
+            {/* Notch */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-b-3xl" />
+            {/* Screen */}
+            <div className="relative w-full h-full bg-white rounded-[36px] overflow-hidden">
+              <div className="absolute inset-0 pt-6 overflow-y-auto">
+                <div className="space-y-3 p-3">
+                  <img src={src1} alt="第 1 页" className="w-full rounded-lg border border-slate-200" />
+                  <img src={src2} alt="第 2 页" className="w-full rounded-lg border border-slate-200" />
+                  <img src={src3} alt="第 3 页" className="w-full rounded-lg border border-slate-200" />
+                  <img src={src3} alt="第 4 页" className="w-full rounded-lg border border-slate-200" />
+                </div>
               </div>
             </div>
           </div>
