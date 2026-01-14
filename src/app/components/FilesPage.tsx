@@ -8,10 +8,13 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 
-// 确保图片链接有效
-const imgImage1 = "https://via.placeholder.com/308x174?text=Page+1";
-const imgImage2 = "https://via.placeholder.com/308x173?text=Page+2";
-const imgImage3 = "https://via.placeholder.com/309x173?text=Page+3";
+// 确保图片链接有效 
+import imgImage1 from '../../assets/images/preview1.png';
+ import imgImage2 from '../../assets/images/preview2.png';
+ import imgImage3 from '../../assets/images/preview3.png';
+ const src1 = typeof imgImage1 === 'string' ? imgImage1 : imgImage1.src;
+const src2 = typeof imgImage2 === 'string' ? imgImage2 : imgImage2.src;
+const src3 = typeof imgImage3 === 'string' ? imgImage3 : imgImage3.src;
 
 export interface ConvertedFile {
   id: string;
@@ -93,16 +96,16 @@ export function FilesPage({ files, onDeleteFile }: FilesPageProps) {
             <div className="space-y-3">
               {/* 使用占位图片 */}
               <div className="relative w-full aspect-[308/174] rounded-lg overflow-hidden">
-                <img src={imgImage1} alt="第 1 页" className="w-full h-full object-cover" />
+                <img src = {src1} alt="第 1 页" className="w-full h-full object-cover" />
               </div>
               <div className="relative w-full aspect-[308/173] rounded-lg overflow-hidden">
-                <img src={imgImage2} alt="第 2 页" className="w-full h-full object-cover" />
+                <img src={src2} alt="第 2 页" className="w-full h-full object-cover" />
               </div>
               <div className="relative w-full aspect-[309/173] rounded-lg overflow-hidden">
-                <img src={imgImage3} alt="第 3 页" className="w-full h-full object-cover" />
+                <img src={src3} alt="第 3 页" className="w-full h-full object-cover" />
               </div>
               <div className="relative w-full aspect-[309/173] rounded-lg overflow-hidden">
-                <img src={imgImage3} alt="第 4 页" className="w-full h-full object-cover" />
+                <img src={src3} alt="第 4 页" className="w-full h-full object-cover" />
               </div>
             </div>
           </div>
