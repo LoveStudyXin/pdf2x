@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { ConversionPage } from './components/ConversionPage';
 import { PhoneShell } from './components/PhoneShell';
 import { TabNavigator } from './components/TabNavigator';
@@ -70,6 +70,12 @@ function AppContent() {
   const [progress, setProgress] = useState(0);
   const [barVisible, setBarVisible] = useState(false);
 
+  // Fullscreen overlay (hide preview UI until loaded)
+  const [previewOverlayVisible, setPreviewOverlayVisible] = useState(false);
+  const overlayShownAtRef = useRef<number>(0);
+  const overlayHideTimerRef = useRef<number | null>(null);
+  const OVERLAY_MIN_MS = 300;
+
   // Boot-time loader to cover first paint white strip
   const [bootLoading, setBootLoading] = useState(true);
   useLayoutEffect(() => {
@@ -84,23 +90,47 @@ function AppContent() {
 
   // Register listeners before paint to avoid missing first preview event
   useLayoutEffect(() => {
+    const clearOverlayHideTimer = () => {
+      if (overlayHideTimerRef.current != null) {
+        window.clearTimeout(overlayHideTimerRef.current);
+        overlayHideTimerRef.current = null;
+      }
+    };
+
     const onStart = () => {
+      clearOverlayHideTimer();
+      overlayShownAtRef.current = Date.now();
+      setPreviewOverlayVisible(true);
+
       setBarVisible(true);
       setPreviewLoading(true);
     };
+
     const onEnd = () => {
       setPreviewLoading(false);
+
+      // keep overlay visible for a minimum time to avoid flicker
+      const elapsed = Date.now() - overlayShownAtRef.current;
+      const wait = Math.max(0, OVERLAY_MIN_MS - elapsed);
+      clearOverlayHideTimer();
+      overlayHideTimerRef.current = window.setTimeout(() => {
+        setPreviewOverlayVisible(false);
+        overlayHideTimerRef.current = null;
+      }, wait);
     };
+
     const onToggle = (e: Event) => {
       const detail = (e as CustomEvent<boolean>).detail;
       if (detail) onStart();
       else onEnd();
     };
+
     window.addEventListener('attachment-preview-start', onStart);
     window.addEventListener('attachment-preview-end', onEnd);
     window.addEventListener('attachment-preview-loading', onToggle as EventListener);
 
     return () => {
+      clearOverlayHideTimer();
       window.removeEventListener('attachment-preview-start', onStart);
       window.removeEventListener('attachment-preview-end', onEnd);
       window.removeEventListener('attachment-preview-loading', onToggle as EventListener);
@@ -170,6 +200,44 @@ function AppContent() {
               transition: 'width 200ms ease',
             }}
           />
+        </div>
+      )}
+
+      {/* Fullscreen loading mask: show first, then reveal preview when loaded */}
+      {previewOverlayVisible && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: '#fff',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: 12,
+          }}
+        >
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: '50%',
+              border: '3px solid rgba(0,0,0,0.12)',
+              borderTopColor: '#3b82f6',
+              animation: 'app_preview_spin 0.9s linear infinite',
+            }}
+          />
+          <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.6)' }}>加载中…</div>
+
+          {/* local keyframes (no new css file) */}
+          <style>
+            {`
+              @keyframes app_preview_spin {
+                to { transform: rotate(360deg); }
+              }
+            `}
+          </style>
         </div>
       )}
 
