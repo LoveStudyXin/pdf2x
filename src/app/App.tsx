@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { ConversionPage } from './components/ConversionPage';
 import { PhoneShell } from './components/PhoneShell';
 import { TabNavigator } from './components/TabNavigator';
@@ -70,7 +70,20 @@ function AppContent() {
   const [progress, setProgress] = useState(0);
   const [barVisible, setBarVisible] = useState(false);
 
-  useEffect(() => {
+  // Boot-time loader to cover first paint white strip
+  const [bootLoading, setBootLoading] = useState(true);
+  useLayoutEffect(() => {
+    // show a minimal bar immediately on first mount
+    setBarVisible(true);
+    setProgress(0.1);
+    const t = window.setTimeout(() => {
+      setBootLoading(false); // stop boot loader after a short time
+    }, 800);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  // Register listeners before paint to avoid missing first preview event
+  useLayoutEffect(() => {
     const onStart = () => {
       setBarVisible(true);
       setPreviewLoading(true);
@@ -97,12 +110,14 @@ function AppContent() {
   useEffect(() => {
     let timer: number | undefined;
     if (previewLoading) {
+      // active preview: indeterminate progress up to 90%
       setBarVisible(true);
       setProgress(prev => (prev === 0 ? 0.1 : prev));
       timer = window.setInterval(() => {
         setProgress(prev => Math.min(prev + Math.max(0.03, (1 - prev) * 0.2), 0.9));
       }, 300);
-    } else if (barVisible) {
+    } else if (!previewLoading && !bootLoading && barVisible) {
+      // finish and fade out
       setProgress(1);
       const doneTimer = window.setTimeout(() => {
         setBarVisible(false);
@@ -113,7 +128,7 @@ function AppContent() {
     return () => {
       if (timer) window.clearInterval(timer);
     };
-  }, [previewLoading, barVisible]);
+  }, [previewLoading, bootLoading, barVisible]);
 
   const handleStartConversion = () => {
     setCurrentView('conversion');
@@ -133,8 +148,8 @@ function AppContent() {
 
   return (
     <>
-      {/* Global top loading bar for attachment preview */}
-      {barVisible && (
+      {/* Global top loading bar for attachment preview and first paint */}
+      {(barVisible || bootLoading) && (
         <div
           style={{
             position: 'fixed',
