@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ConversionPage } from './components/ConversionPage';
 import { PhoneShell } from './components/PhoneShell';
 import { TabNavigator } from './components/TabNavigator';
@@ -65,6 +65,56 @@ function AppContent() {
     },
   ]);
 
+  // Global attachment preview loading bar state
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [barVisible, setBarVisible] = useState(false);
+
+  useEffect(() => {
+    const onStart = () => {
+      setBarVisible(true);
+      setPreviewLoading(true);
+    };
+    const onEnd = () => {
+      setPreviewLoading(false);
+    };
+    const onToggle = (e: Event) => {
+      const detail = (e as CustomEvent<boolean>).detail;
+      if (detail) onStart();
+      else onEnd();
+    };
+    window.addEventListener('attachment-preview-start', onStart);
+    window.addEventListener('attachment-preview-end', onEnd);
+    window.addEventListener('attachment-preview-loading', onToggle as EventListener);
+
+    return () => {
+      window.removeEventListener('attachment-preview-start', onStart);
+      window.removeEventListener('attachment-preview-end', onEnd);
+      window.removeEventListener('attachment-preview-loading', onToggle as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    let timer: number | undefined;
+    if (previewLoading) {
+      setBarVisible(true);
+      setProgress(prev => (prev === 0 ? 0.1 : prev));
+      timer = window.setInterval(() => {
+        setProgress(prev => Math.min(prev + Math.max(0.03, (1 - prev) * 0.2), 0.9));
+      }, 300);
+    } else if (barVisible) {
+      setProgress(1);
+      const doneTimer = window.setTimeout(() => {
+        setBarVisible(false);
+        setProgress(0);
+      }, 300);
+      return () => window.clearTimeout(doneTimer);
+    }
+    return () => {
+      if (timer) window.clearInterval(timer);
+    };
+  }, [previewLoading, barVisible]);
+
   const handleStartConversion = () => {
     setCurrentView('conversion');
   };
@@ -83,6 +133,31 @@ function AppContent() {
 
   return (
     <>
+      {/* Global top loading bar for attachment preview */}
+      {barVisible && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: 3,
+            background: 'rgba(0,0,0,0.06)',
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              width: `${progress * 100}%`,
+              height: '100%',
+              background: '#3b82f6',
+              boxShadow: '0 0 2px #3b82f6',
+              transition: 'width 200ms ease',
+            }}
+          />
+        </div>
+      )}
+
       {currentView === 'conversion' ? (
         <ConversionPage 
           onBack={handleBackToHome}
