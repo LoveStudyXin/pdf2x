@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, Download, Trash2, MoreVertical, ArrowLeft, FileText } from 'lucide-react';
 import { Button } from './ui/button';
 import {
@@ -34,6 +34,8 @@ interface FilesPageProps {
 export function FilesPage({ files, onDeleteFile }: FilesPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [previewFile, setPreviewFile] = useState<ConvertedFile | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const loadingStartRef = useRef<number>(0);
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 B';
@@ -73,6 +75,30 @@ export function FilesPage({ files, onDeleteFile }: FilesPageProps) {
     file.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // 当预览文件变化时触发 loading 事件 + 本地 loading 状态
+  useEffect(() => {
+    if (previewFile) {
+      loadingStartRef.current = Date.now();
+      setPreviewLoading(true);
+
+      // 开始预览：立即触发 loading
+      window.dispatchEvent(new Event('attachment-preview-start'));
+
+      // 模拟图片加载完成后，强制等待至少 1.5s
+      const timer = setTimeout(() => {
+        const elapsed = Date.now() - loadingStartRef.current;
+        const wait = Math.max(0, 1000 - elapsed);
+
+        setTimeout(() => {
+          setPreviewLoading(false);
+          window.dispatchEvent(new Event('attachment-preview-end'));
+        }, wait);
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [previewFile]);
+
   // 如果在预览模式，显示预览页面
   if (previewFile) {
     return (
@@ -94,6 +120,32 @@ export function FilesPage({ files, onDeleteFile }: FilesPageProps) {
                 </button>
                 <h1 className="text-sm text-slate-800">文件预览</h1>
               </div>
+
+              {/* Loading overlay inside phone screen - below header */}
+              {previewLoading && (
+                <div className="absolute left-0 right-0 bottom-0 bg-white z-50 flex items-center justify-center flex-col gap-3"
+                  style={{ top: '76px' }}
+                >
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      border: '3px solid rgba(0,0,0,0.12)',
+                      borderTopColor: '#3b82f6',
+                      animation: 'preview_spin 0.9s linear infinite',
+                    }}
+                  />
+                  <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.6)' }}>加载中…</div>
+                  <style>
+                    {`
+                      @keyframes preview_spin {
+                        to { transform: rotate(360deg); }
+                      }
+                    `}
+                  </style>
+                </div>
+              )}
 
               {/* Scrollable content inside phone */}
               <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 pb-24">
